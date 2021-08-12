@@ -1,0 +1,11 @@
+{
+    //sources is a dictionary of power providers
+    "sources":{
+        // "grid":{"class":"Source", "reserve":0, "capacity":35000},
+        "solar":{"class":"Source_e3dc", "reserve":0, "capacity":0, "address":"192.168.178.20", "interval":1}
+    },
+    //sinks is a directory of power consumers
+    "sinks":{
+        "charger":{"class":"Charger","address":"192.168.178.83"}
+    }
+}
