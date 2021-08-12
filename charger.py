@@ -3,6 +3,7 @@ import requests
 import time
 import json
 import logging
+import os
 logger = logging.getLogger('charger')
 logger.setLevel(logging.INFO)
 from sink import Sink
@@ -205,7 +206,7 @@ class Charger(Sink):
     def read_data(self):
         if data_override_file!="":
             try:
-                with open(data_override_file) as json_file:
+                with open(os.path.dirname(os.path.abspath(__file__))+data_override_file) as json_file:
                     override_data = json.load(json_file)
                     res=override_data.get("res")
                     if not res is None:
@@ -248,8 +249,6 @@ class Charger(Sink):
 
     def statemachine(self):
         if self.plug_state==Plug_states.INITIALIZE_CHARGER:
-            print("<<<HERE>>>")
-            print(self.address)
             self.reachable=False
             # older chargers tend to measure a too low volate
             # as power is measured voltage*current, power needs same correction
@@ -262,16 +261,14 @@ class Charger(Sink):
                     #HW3 ist more correct than deviation of 5% from HW2 and bef6ore
                     self.correction_factor=1
                 self.correction_factor=float(self.config.get("correction_factor",str(self.correction_factor)))
-                if self.reachable:
-                    self.plug_state=Plug_states.RESTARTING
                 self.data=self.http_get("status")
                 if not self.data is None:
                     if float(self.data["fwv"])>=40:
                         self.capabilities["amx"]=True
                     self.read_data()
                     self.set_amp(0)
-            else:
-                dbg_msg("no address given")
+                if self.reachable:
+                    self.plug_state=Plug_states.RESTARTING
         if self.plug_state==Plug_states.RESTARTING:
             oldmode=self.get_charge_mode()
             # reset charger mode to automatic
