@@ -143,12 +143,12 @@ class Charger(Sink):
     def update(self):
         if self.nexttick<time.time():
             self.nextinterval()
-            if self.plug_state!=Plug_states.INITIALIZE_CHARGER:
-                data=self.http_get("status")
-                if not data is None:
-                    self.data=data
-                    self.read_data()
-                    self.statemachine()
+#            if self.plug_state!=Plug_states.INITIALIZE_CHARGER:
+            data=self.http_get("status")
+            if not data is None:
+                self.data=data
+                self.read_data()
+                self.statemachine()
             print(self.name+": "+str(self),end="")
 
     def set_amp(self,newvalue):
@@ -185,6 +185,7 @@ class Charger(Sink):
             self.data=self.http_get("mqtt?payload=alw="+str(1 if run else 0))
 
     def http_get(self,uri):
+        print("trying to get data from", self.address)
         try:
             r = requests.get("http://"+str(self.address)+"/"+uri)
             self.reachable=True
@@ -247,6 +248,8 @@ class Charger(Sink):
 
     def statemachine(self):
         if self.plug_state==Plug_states.INITIALIZE_CHARGER:
+            print("<<<HERE>>>")
+            print(self.address)
             self.reachable=False
             # older chargers tend to measure a too low volate
             # as power is measured voltage*current, power needs same correction
@@ -267,6 +270,8 @@ class Charger(Sink):
                         self.capabilities["amx"]=True
                     self.read_data()
                     self.set_amp(0)
+            else:
+                dbg_msg("no address given")
         if self.plug_state==Plug_states.RESTARTING:
             oldmode=self.get_charge_mode()
             # reset charger mode to automatic
@@ -363,6 +368,7 @@ class Charger(Sink):
     def __str__(self):
         state=charge_states[self.charge_state] if self.plug_state==Plug_states.PLUGGED_IN else plug_states[self.plug_state]
         return str({
+            "reachable":self.reachable,
             "state":state,
             "connected phases":self.connected_phase_count,
             "car_phases":self.car_phase_count,

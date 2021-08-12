@@ -1,5 +1,6 @@
 import time
 import commentjson
+import os
 from controller import Controller
 import logging
 logger = logging.getLogger('pichaco3')
@@ -7,7 +8,7 @@ logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(asctime)s.%(msecs)03d %(levelname)s {%(module)s} %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 #logging.basicConfig(encoding='utf-8', level=logging.INFO)
 
-with open('config.json') as json_file:
+with open(os.path.dirname(os.path.abspath(__file__))+'/config.json') as json_file:
     config = commentjson.load(json_file)
 controller=Controller("Pichaco3",config)
 nexttick=round(time.time(),0)

@@ -1,8 +1,9 @@
 import time
+from generic_object import Generic_object
 
-class Sink():
+class Sink(Generic_object):
     def __init__(self,name,config):
-        self.name=name
+        super().__init__(name,config)
         self.is_active=False
         self.is_ready=False
         self.min_activation_power=0
@@ -13,13 +14,6 @@ class Sink():
         self.reserve=0
         self.capacity=0
         self.interval=int(config.get("interval","5"))
-        self.nexttick=time.time()
-    def nextinterval(self):
-        # calculate next tick and skip if it is already in the past
-        while self.nexttick<time.time():
-            self.nexttick=self.nexttick+self.interval
-    def update(self):
-        pass
     def activate(self):
         pass
     def deactivate(self):
@@ -27,5 +21,3 @@ class Sink():
     def __str__(self):
         state="not_ready" if not self.is_ready else "active" if self.is_active else "ready"
         return str({"state":state})+"\n"
-    def __repr__(self):
-        return self.__str__()
