@@ -14,5 +14,5 @@ intended to run on python3.7 on a raspberry pi
 Prerequesites (pip3 install):
 pymodbus commentjson
 
-after checkout make a copy of the config.json.example to config.json and change the addresses to your local addresses
-please also make sure that the interfaces of the devices are activated.
+After checkout make a copy of the config.json.example to config.json and change the addresses to your local addresses.
+Please also make sure that the interfaces of the devices are activated.
