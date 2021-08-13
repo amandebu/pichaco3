@@ -263,10 +263,10 @@ class Charger(Sink):
                 self.correction_factor=float(self.config.get("correction_factor",str(self.correction_factor)))
                 self.data=self.http_get("status")
                 if not self.data is None:
+                    self.set_amp(0)
                     if float(self.data["fwv"])>=40:
                         self.capabilities["amx"]=True
                     self.read_data()
-                    self.set_amp(0)
                 if self.reachable:
                     self.plug_state=Plug_states.RESTARTING
         if self.plug_state==Plug_states.RESTARTING:
