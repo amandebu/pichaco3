@@ -39,6 +39,8 @@ class Controller():
         # determine overall reserve
         reserve=0
         capacity=0
+        chokeing=False
+        starving=False
         for power_source in self.sources.values():
             if tick%power_source.interval==0:
                 if not power_source.online:
@@ -55,6 +57,8 @@ class Controller():
                        power_source.reserve=0
                     reserve+=power_source.reserve
                     capacity+=power_source.capacity
+                    chokeing=chokeing or power_source.chokeing
+                    starving=starving or power_source.starving
                 else:
                     logger.info(power_source.name+" is offline")
         # notify sinks about reserve
@@ -65,6 +69,8 @@ class Controller():
                 if power_sink.online:
                     power_sink.reserve=reserve
                     power_sink.capacity=capacity
+                    power_sink.chokeing=chokeing
+                    power_sink.starving=starving
                     try:
                         power_sink.update()
                     except:

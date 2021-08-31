@@ -10,18 +10,19 @@ class Source_e3dc(Source):
     def update(self):
         if not self.address is None:
             data=getData(address=self.address,port=self.port)
-            #data["alienPower"]=-data["powermeter_1_l1"]-data["powermeter_1_l2"]-data["powermeter_1_l3"]
-            data["alienPower"]=0
-            #print(data)
-            #self.reserve=-min(data["gridPower"],0)-min(data["powermeter_1_l1"],0)-min(data["powermeter_1_l2"],0)-min(data["powermeter_1_l3"],0)
-            #self.reserve=max(data["pvPower"],0)-max(data["housePower"],0)-min(data["powermeter_1_l1"],0)-min(data["powermeter_1_l2"],0)-min(data["powermeter_1_l3"],0)
-            self.reserve=data["pvPower"]-data["housePower"]
+            data["alienPower"]=-data["powermeter_1_l1"]-data["powermeter_1_l2"]-data["powermeter_1_l3"]
+            self.reserve=max(data["pvPower"],0)-max(data["housePower"],0)-min(data["powermeter_1_l1"],0)-min(data["powermeter_1_l2"],0)-min(data["powermeter_1_l3"],0)-max(data["batteryPower"],0)
             data["reserve"]=self.reserve
+            if self.chokeing<=95 and self.chokeing:
+                self.chokeing=False
+            elif self.chokeing>=99 and not self.chokeing:
+                self.chokeing=True
+            data["chokeing"]=self.chokeing
             self.data=data
         print(self.name+": "+str(self))
     def __str__(self):
         result={}
-        for key in ["pvPower","batteryPower","housePower","gridPower","soc","alienPower","reserve"]:
+        for key in ["pvPower","batteryPower","housePower","gridPower","soc","alienPower","reserve","chokeing"]: 
             result[key]=self.data[key]
         return str(result)
 
@@ -89,13 +90,13 @@ def getData(address,port):
         mb=ModbusConnection(address,port,-1)
         if mb.read_register_uint16(40001)==58332:
             reg=mb.read_register_uint16(40002)
-    #        result["modbusFirmware"]=str(mb.hi(reg))+"."+str(mb.lo(reg))
+            result["modbusFirmware"]=str(mb.hi(reg))+"."+str(mb.lo(reg))
             result["registerCount"]=mb.read_register_uint16(40003)
-    #        result["manufacturer"]=mb.read_register_str(40004,16)
+            result["manufacturer"]=mb.read_register_str(40004,16)
 
-    #        result["model"]=mb.read_register_str(40020,16)
-    #        result["serial"]=mb.read_register_str(40036,16)
-    #        result["firmware"]=mb.read_register_str(40052,16)
+            result["model"]=mb.read_register_str(40020,16)
+            result["serial"]=mb.read_register_str(40036,16)
+            result["firmware"]=mb.read_register_str(40052,16)
 
             result["pvPower"]=mb.read_register_int32(40068)
             result["batteryPower"]=mb.read_register_int32(40070)
@@ -103,27 +104,27 @@ def getData(address,port):
             result["housePower"]=mb.read_register_int32(40072)
             result["gridPower"]=mb.read_register_int32(40074)
             
-    #        result["generatorPower"]=mb.read_register_int32(40076)
-    #        result["wallboxPower"]=mb.read_register_int32(40078)
+            result["generatorPower"]=mb.read_register_int32(40076)
+            result["wallboxPower"]=mb.read_register_int32(40078)
             
-    #        result["wallboxPVPower"]=mb.read_register_int32(40080)
-    #        reg=mb.read_register_uint16(40082)
-    #        result["autarky"]=mb.hi(reg)
-    #        result["selfconsumption"]=mb.lo(reg)
+            result["wallboxPVPower"]=mb.read_register_int32(40080)
+            reg=mb.read_register_uint16(40082)
+            result["autarky"]=mb.hi(reg)
+            result["selfconsumption"]=mb.lo(reg)
 
             result["soc"]=mb.read_register_uint16(40083)
-    #        result["islandMode"]=mb.read_register_uint16(40084)==1
+            result["islandMode"]=mb.read_register_uint16(40084)==1
     #        result["emsStatus"]=mb.read_register_uint16(40085)
-    #        if result["registerCount"]>103:
-    #            s1=mb.read_register_uint16(40102)
-    #            s2=mb.read_register_uint16(40103)
-    #            result["DCPower_string1"]=s1
-    #            result["DCPower_string2"]=s2
-    #            result["DCPower_sum"]=s1+s2
+            if result["registerCount"]>103:
+                s1=mb.read_register_uint16(40102)
+                s2=mb.read_register_uint16(40103)
+                result["DCPower_string1"]=s1
+                result["DCPower_string2"]=s2
+                result["DCPower_sum"]=s1+s2
             powerMeters=[]
             if result["registerCount"]>127:
-    #            for powerMeterIndex in range(7):
-                for powerMeterIndex in [0,1]:
+                for powerMeterIndex in range(7):
+#                for powerMeterIndex in [0,1,2,3,4,5,6]:
                     reg=40105+powerMeterIndex*4
                     result["powermeter_"+str(powerMeterIndex)+"_type"]=powermetertypes[mb.read_register_uint16(reg)]
                     result["powermeter_"+str(powerMeterIndex)+"_l1"]=mb.read_register_int16(reg+1)

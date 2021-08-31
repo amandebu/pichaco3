@@ -352,7 +352,7 @@ class Charger(Sink):
                 elif (self.reserve>self.step_power+UPHYSTERESIS) and (self.current_power>(self.step_power*(self.amp-1))):
                     self.set_amp(self.amp+1)
             elif self.charge_state==Charge_states.WAITING_FOR_POWER:
-                if self.reserve>self.start_power:
+                if (self.reserve>self.start_power) or (self.override_amp>0):
                     self.activate_charger(True)
                     self.charge_state=Charge_states.CHARGING
                 else:

@@ -11,6 +11,8 @@ class Generic_object():
         self.callback_offline=None
         self.interval=int(config.get("interval","1"))
         self.nexttick=time.time()
+        self.chokeing=False
+        self.starving=False
     def get_online(self):
         return self.__online
     def set_online(self,state):
