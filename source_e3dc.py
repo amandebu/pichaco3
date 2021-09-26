@@ -11,7 +11,8 @@ class Source_e3dc(Source):
         if not self.address is None:
             data=getData(address=self.address,port=self.port)
             data["alienPower"]=-data["powermeter_1_l1"]-data["powermeter_1_l2"]-data["powermeter_1_l3"]
-            self.reserve=max(data["pvPower"],0)-max(data["housePower"],0)-min(data["powermeter_1_l1"],0)-min(data["powermeter_1_l2"],0)-min(data["powermeter_1_l3"],0)-max(data["batteryPower"],0)
+            self.reserve=max(data["pvPower"],0)-max(data["housePower"],0)-min(data["powermeter_1_l1"],0)-min(data["powermeter_1_l2"],0)-min(data["powermeter_1_l3"],0)
+            # self.reserve=max(data["pvPower"],0)-max(data["housePower"],0)-min(data["powermeter_1_l1"],0)-min(data["powermeter_1_l2"],0)-min(data["powermeter_1_l3"],0)-max(data["batteryPower"],0)
             data["reserve"]=self.reserve
             if self.chokeing<=95 and self.chokeing:
                 self.chokeing=False

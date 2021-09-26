@@ -188,7 +188,7 @@ class Charger(Sink):
     def http_get(self,uri):
         print("trying to get data from", self.address)
         try:
-            r = requests.get("http://"+str(self.address)+"/"+uri)
+            r = requests.get("http://"+str(self.address)+"/"+uri,timeout=3)
             self.reachable=True
         except:
             self.reachable=False
